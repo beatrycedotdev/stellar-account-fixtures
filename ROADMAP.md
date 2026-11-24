@@ -1,6 +1,6 @@
 # ROADMAP: Stellar account fixtures
 
-Last updated: 2026-11-24 06:03 UTC
+Last updated: 2026-11-24 06:04 UTC
 
 A corpus of public Stellar account reads, their provenance, and the validator that keeps
 the provenance honest. Nothing here is a claim about whether an account is well
@@ -36,9 +36,9 @@ empty gap list is gate G2.
 |---|---|---|---|---|
 | 0 | Ground truth | 5 | 6 | 83% |
 | 1 | Repository wrapper | 10 | 10 | 100% |
-| 2 | Coverage | 38 | 41 | 93% |
+| 2 | Coverage | 39 | 42 | 93% |
 | 3 | Consumer contract | 3 | 4 | 75% |
-| **All phases** | **Readiness total** | **56** | **61** | **92%** |
+| **All phases** | **Readiness total** | **57** | **62** | **92%** |
 | Gates | G1 to G5 | 2 | 5 | 40% |
 <!-- PROGRESS:END -->
 
@@ -167,6 +167,7 @@ python3 scripts/roadmap_progress.py --check ROADMAP.md
 - [x] **2.39** Prove an unreadable corpus exits two with empty stdout in `tests/test_validate_exit_stdout.py`. S. Deps: 1.3. Done when: `tests/test_validate_exit_stdout.py` asserts subprocess execution of `validate.py` with an unreadable or non-existent `--root` exits 2 with empty stdout and single-line stderr starting with `validate: no readable corpus at`. (done 2026-11-24: added `tests/test_validate_exit_stdout.py` verifying exit code 2, zero stdout bytes, and clean stderr error prefix)
 - [x] **2.40** Verify the `--root` CLI option in `tests/test_validate_root_option.py` to prove external corpus validation operates cleanly. S. Deps: 1.3. Done when: `tests/test_validate_root_option.py` validates an external corpus instantiated outside the checkout via `main(['--root', ...])`, asserts exit code 0, verifies relative `fixtures/<id>` prefixes on report lines, and cleans up temporary resources. (done 2026-11-24: added `tests/test_validate_root_option.py` verifying external root validation and report prefixes)
 - [x] **2.41** Ensure validator report line ordering is deterministic in `tests/test_validate_report_order.py` regardless of filesystem directory iteration. S. Deps: 0.5. Done when: `tests/test_validate_report_order.py` instantiates identical fixture directories in reverse and scrambled creation orders and asserts that `validate(report=True)` outputs byte-identical, lexicographically sorted report lines. (done 2026-11-24: added `tests/test_validate_report_order.py` verifying report line ordering determinism across reverse and scrambled directory iteration)
+- [x] **2.42** Pin the `fixtures/<name>` prefix requirement for all fixture-level problem messages in `tests/test_validate_problem_prefix.py`. S. Deps: 0.1. Done when: `tests/test_validate_problem_prefix.py` exercises missing files, extra files, digest errors, and malformed TOML manifests, and asserts 100% of generated problem messages begin with `fixtures/<name>: `. (done 2026-11-24: added `tests/test_validate_problem_prefix.py` asserting consistent fixture directory error prefixes across all failure modes)
 
 ### Phase 3: Consumer contract
 
@@ -189,6 +190,7 @@ python3 scripts/roadmap_progress.py --check ROADMAP.md
 
 | When | What | Tasks |
 |---|---|---|
+| 2026-11-24 06:04 | Pin fixture directory prefix on problem reports in `tests/test_validate_problem_prefix.py`: assert 100% of error messages for missing files, extra files, digest mismatches, and malformed manifests start with `fixtures/<name>: `. | 2.42 |
 | 2026-11-24 06:03 | Pin deterministic validator report line order in `tests/test_validate_report_order.py`: verify reverse and scrambled directory creation orders produce identical alphabetical report lines. | 2.41 |
 | 2026-11-24 06:02 | Verify external `--root` CLI execution in `tests/test_validate_root_option.py`: instantiate valid corpus in temporary directory outside checkout, validate via `main(['--root', ...])`, assert exit 0, and confirm relative report prefixes. | 2.40 |
 | 2026-11-24 06:01 | Prove unreadable corpus CLI contract in `tests/test_validate_exit_stdout.py`: assert subprocess execution of `validate.py` with non-existent or invalid `--root` exits 2, emits zero stdout bytes, and prints single-line error to stderr. | 2.39 |
