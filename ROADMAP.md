@@ -1,6 +1,6 @@
 # ROADMAP: Stellar account fixtures
 
-Last updated: 2026-11-24 06:01 UTC
+Last updated: 2026-11-24 06:02 UTC
 
 A corpus of public Stellar account reads, their provenance, and the validator that keeps
 the provenance honest. Nothing here is a claim about whether an account is well
@@ -36,9 +36,9 @@ empty gap list is gate G2.
 |---|---|---|---|---|
 | 0 | Ground truth | 5 | 6 | 83% |
 | 1 | Repository wrapper | 10 | 10 | 100% |
-| 2 | Coverage | 36 | 39 | 92% |
+| 2 | Coverage | 37 | 40 | 92% |
 | 3 | Consumer contract | 3 | 4 | 75% |
-| **All phases** | **Readiness total** | **54** | **59** | **92%** |
+| **All phases** | **Readiness total** | **55** | **60** | **92%** |
 | Gates | G1 to G5 | 2 | 5 | 40% |
 <!-- PROGRESS:END -->
 
@@ -165,6 +165,7 @@ python3 scripts/roadmap_progress.py --check ROADMAP.md
 - [x] **2.37** Pin the `fetch()` retry schedule in `tests/test_capture_retry_schedule.py` with an injected sleep. M. Deps: 0.4. Done when: with `time.sleep` and `OPENER.open` patched, transient 5xx and network failures sleep exactly 1.5, 3.0 and 4.5 seconds, a fourth attempt is never made and `RuntimeError` follows the third failure, and a 4xx raises `Refused` at once without sleeping or retrying. **Issue:** #88. (done 2026-11-21 21:26: added `tests/test_capture_retry_schedule.py`, eleven tests covering 5xx, `URLError`, `TimeoutError` and `OSError` exhaustion, 4xx codes 400 to 499 including 429, a 4xx after a retry, recovery after two failures, the per-attempt request and 15 second timeout, and the exit codes 1 and 2 through `main()`; no test opens a socket or waits on a clock. No change to `tools/capture.py`.)
 - [x] **2.38** Table the checksum refusal for mutated `G...` addresses in `tests/test_capture_strkey_table.py`. S. Deps: 0.2. Done when: at least eight distinct mutations of a valid address each raise `Refused`, exit 2 through `main()` and print the refusal, and no network request or socket connection is made for any of them. **Issue:** #91. (done 2026-11-21 21:28: added `tests/test_capture_strkey_table.py`, fifteen mutations built at run time with `base64` and `binascii.crc_hqx` rather than `validate.py`'s own encoder: version byte flips that keep the leading `G`, a payload bit flip, a changed checksum nibble, transposed checksum bytes, all-zero payloads with a wrong checksum, a changed last character of a shipped account, lengths 55 and 57, the illegal characters `8`, `9`, `0` and `1`, and lowercase. Each row asserts the exact refusal it reaches, with `fetch`, `OPENER.open` and the socket entry points patched to fail if touched, and a control row proves the unmutated address gets as far as `fetch()`. No change to `tools/capture.py` or `validate.py`.)
 - [x] **2.39** Prove an unreadable corpus exits two with empty stdout in `tests/test_validate_exit_stdout.py`. S. Deps: 1.3. Done when: `tests/test_validate_exit_stdout.py` asserts subprocess execution of `validate.py` with an unreadable or non-existent `--root` exits 2 with empty stdout and single-line stderr starting with `validate: no readable corpus at`. (done 2026-11-24: added `tests/test_validate_exit_stdout.py` verifying exit code 2, zero stdout bytes, and clean stderr error prefix)
+- [x] **2.40** Verify the `--root` CLI option in `tests/test_validate_root_option.py` to prove external corpus validation operates cleanly. S. Deps: 1.3. Done when: `tests/test_validate_root_option.py` validates an external corpus instantiated outside the checkout via `main(['--root', ...])`, asserts exit code 0, verifies relative `fixtures/<id>` prefixes on report lines, and cleans up temporary resources. (done 2026-11-24: added `tests/test_validate_root_option.py` verifying external root validation and report prefixes)
 
 ### Phase 3: Consumer contract
 
@@ -187,6 +188,7 @@ python3 scripts/roadmap_progress.py --check ROADMAP.md
 
 | When | What | Tasks |
 |---|---|---|
+| 2026-11-24 06:02 | Verify external `--root` CLI execution in `tests/test_validate_root_option.py`: instantiate valid corpus in temporary directory outside checkout, validate via `main(['--root', ...])`, assert exit 0, and confirm relative report prefixes. | 2.40 |
 | 2026-11-24 06:01 | Prove unreadable corpus CLI contract in `tests/test_validate_exit_stdout.py`: assert subprocess execution of `validate.py` with non-existent or invalid `--root` exits 2, emits zero stdout bytes, and prints single-line error to stderr. | 2.39 |
 | 2026-11-23 17:31 | Four validator suites and one rule (closing #79, #82, #83, #85): the nested-directory blind spot is pinned in both directions, duplicate `fixture.toml` keys are shown to arrive as `sidecar is not valid TOML` rather than a traceback, `check_captured` now refuses a sidecar ledger below the account's `last_modified_ledger` and the nine shipped fixtures still pass, and the CLI's stdout/stderr/exit split is driven as a subprocess over success, report, problem and unreadable-root corpora. | 2.31, 2.32, 2.33, 2.34 |
 | 2026-11-23 17:18 | Two suites pinned rather than described (pull request #146): `tests/test_validate_duplicate_json_keys.py` records that `json.loads` keeps the last of two duplicate `home_domain` keys in `account.json`, that shape derivation reads that surviving value, and that `validate.py` still hashes the original bytes, so the behaviour is pinned without claiming key uniqueness is enforced; `tests/test_validate_corpus_identity.py` audits all nine shipped captures, tying each `fixture.toml` id to its directory, its network to the root document for that network, and its `account_id` to the bytes beside it. No validator, tool or fixture changed and no task is ticked. | none ticked |
