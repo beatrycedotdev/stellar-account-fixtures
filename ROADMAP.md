@@ -1,6 +1,6 @@
 # ROADMAP: Stellar account fixtures
 
-Last updated: 2026-11-24 06:02 UTC
+Last updated: 2026-11-24 06:03 UTC
 
 A corpus of public Stellar account reads, their provenance, and the validator that keeps
 the provenance honest. Nothing here is a claim about whether an account is well
@@ -36,9 +36,9 @@ empty gap list is gate G2.
 |---|---|---|---|---|
 | 0 | Ground truth | 5 | 6 | 83% |
 | 1 | Repository wrapper | 10 | 10 | 100% |
-| 2 | Coverage | 37 | 40 | 92% |
+| 2 | Coverage | 38 | 41 | 93% |
 | 3 | Consumer contract | 3 | 4 | 75% |
-| **All phases** | **Readiness total** | **55** | **60** | **92%** |
+| **All phases** | **Readiness total** | **56** | **61** | **92%** |
 | Gates | G1 to G5 | 2 | 5 | 40% |
 <!-- PROGRESS:END -->
 
@@ -166,6 +166,7 @@ python3 scripts/roadmap_progress.py --check ROADMAP.md
 - [x] **2.38** Table the checksum refusal for mutated `G...` addresses in `tests/test_capture_strkey_table.py`. S. Deps: 0.2. Done when: at least eight distinct mutations of a valid address each raise `Refused`, exit 2 through `main()` and print the refusal, and no network request or socket connection is made for any of them. **Issue:** #91. (done 2026-11-21 21:28: added `tests/test_capture_strkey_table.py`, fifteen mutations built at run time with `base64` and `binascii.crc_hqx` rather than `validate.py`'s own encoder: version byte flips that keep the leading `G`, a payload bit flip, a changed checksum nibble, transposed checksum bytes, all-zero payloads with a wrong checksum, a changed last character of a shipped account, lengths 55 and 57, the illegal characters `8`, `9`, `0` and `1`, and lowercase. Each row asserts the exact refusal it reaches, with `fetch`, `OPENER.open` and the socket entry points patched to fail if touched, and a control row proves the unmutated address gets as far as `fetch()`. No change to `tools/capture.py` or `validate.py`.)
 - [x] **2.39** Prove an unreadable corpus exits two with empty stdout in `tests/test_validate_exit_stdout.py`. S. Deps: 1.3. Done when: `tests/test_validate_exit_stdout.py` asserts subprocess execution of `validate.py` with an unreadable or non-existent `--root` exits 2 with empty stdout and single-line stderr starting with `validate: no readable corpus at`. (done 2026-11-24: added `tests/test_validate_exit_stdout.py` verifying exit code 2, zero stdout bytes, and clean stderr error prefix)
 - [x] **2.40** Verify the `--root` CLI option in `tests/test_validate_root_option.py` to prove external corpus validation operates cleanly. S. Deps: 1.3. Done when: `tests/test_validate_root_option.py` validates an external corpus instantiated outside the checkout via `main(['--root', ...])`, asserts exit code 0, verifies relative `fixtures/<id>` prefixes on report lines, and cleans up temporary resources. (done 2026-11-24: added `tests/test_validate_root_option.py` verifying external root validation and report prefixes)
+- [x] **2.41** Ensure validator report line ordering is deterministic in `tests/test_validate_report_order.py` regardless of filesystem directory iteration. S. Deps: 0.5. Done when: `tests/test_validate_report_order.py` instantiates identical fixture directories in reverse and scrambled creation orders and asserts that `validate(report=True)` outputs byte-identical, lexicographically sorted report lines. (done 2026-11-24: added `tests/test_validate_report_order.py` verifying report line ordering determinism across reverse and scrambled directory iteration)
 
 ### Phase 3: Consumer contract
 
@@ -188,6 +189,7 @@ python3 scripts/roadmap_progress.py --check ROADMAP.md
 
 | When | What | Tasks |
 |---|---|---|
+| 2026-11-24 06:03 | Pin deterministic validator report line order in `tests/test_validate_report_order.py`: verify reverse and scrambled directory creation orders produce identical alphabetical report lines. | 2.41 |
 | 2026-11-24 06:02 | Verify external `--root` CLI execution in `tests/test_validate_root_option.py`: instantiate valid corpus in temporary directory outside checkout, validate via `main(['--root', ...])`, assert exit 0, and confirm relative report prefixes. | 2.40 |
 | 2026-11-24 06:01 | Prove unreadable corpus CLI contract in `tests/test_validate_exit_stdout.py`: assert subprocess execution of `validate.py` with non-existent or invalid `--root` exits 2, emits zero stdout bytes, and prints single-line error to stderr. | 2.39 |
 | 2026-11-23 17:31 | Four validator suites and one rule (closing #79, #82, #83, #85): the nested-directory blind spot is pinned in both directions, duplicate `fixture.toml` keys are shown to arrive as `sidecar is not valid TOML` rather than a traceback, `check_captured` now refuses a sidecar ledger below the account's `last_modified_ledger` and the nine shipped fixtures still pass, and the CLI's stdout/stderr/exit split is driven as a subprocess over success, report, problem and unreadable-root corpora. | 2.31, 2.32, 2.33, 2.34 |
