@@ -29,7 +29,7 @@ class TestValidateExitStdout(unittest.TestCase):
 
             self.assertEqual(result.returncode, 2)
             self.assertEqual(result.stdout, b"")
-            expected_prefix = f"validate: no readable corpus at {absent.resolve()}".encode("utf-8")
+            expected_prefix = f"validate: no readable corpus at {absent.resolve()}".encode()
             self.assertTrue(
                 result.stderr.startswith(expected_prefix),
                 f"stderr does not start with {expected_prefix!r}: got {result.stderr!r}",
@@ -44,9 +44,7 @@ class TestValidateExitStdout(unittest.TestCase):
 
             self.assertEqual(result.returncode, 2)
             self.assertEqual(result.stdout, b"")
-            expected_prefix = (
-                f"validate: no readable corpus at {empty_root.resolve()}".encode("utf-8")
-            )
+            expected_prefix = f"validate: no readable corpus at {empty_root.resolve()}".encode()
             self.assertTrue(
                 result.stderr.startswith(expected_prefix),
                 f"stderr does not start with {expected_prefix!r}: got {result.stderr!r}",

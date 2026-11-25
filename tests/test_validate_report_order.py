@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import sys
 import tempfile
@@ -30,10 +31,7 @@ ACCOUNT_IDS = {name: generate_account_id(index + 1) for index, name in enumerate
 
 def build_corpus(root: Path, creation_order: tuple[str, ...]) -> None:
     (root / "corpus").mkdir(parents=True, exist_ok=True)
-    (root / "corpus" / "root-public.json").write_text(
-        json.dumps({"network_passphrase": validate.NETWORKS["public"][1]}) + "\n",
-        encoding="utf-8",
-    )
+    write_root_public(root / "corpus")
     for name in creation_order:
         account_id = ACCOUNT_IDS[name]
         fixture_dir = root / "fixtures" / name
@@ -63,6 +61,20 @@ def build_corpus(root: Path, creation_order: tuple[str, ...]) -> None:
             "]\n",
             encoding="utf-8",
         )
+
+
+def write_root_public(corpus_dir: Path) -> None:
+    """Write the public root document and the sha256 sidecar validate.py requires."""
+    document = json.dumps({"network_passphrase": validate.NETWORKS["public"][1]}) + "\n"
+    path = corpus_dir / "root-public.json"
+    path.write_text(document, encoding="utf-8")
+    digest = hashlib.sha256(document.encode()).hexdigest()
+    (corpus_dir / "root-public.toml").write_text(
+        'url = "https://horizon.stellar.org/"\n'
+        'captured_at = "2026-11-25T00:00:00Z"\n'
+        f'sha256 = "{digest}"\n',
+        encoding="utf-8",
+    )
 
 
 class TestValidateReportOrder(unittest.TestCase):

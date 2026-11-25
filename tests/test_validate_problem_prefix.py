@@ -25,16 +25,27 @@ def generate_account_id(seed_byte: int) -> str:
     return "".join(ALPHABET[(bits >> (5 * (55 - index))) & 0x1F] for index in range(56))
 
 
+def write_root_public(corpus_dir: Path) -> None:
+    """Write the public root document and the sha256 sidecar validate.py requires."""
+    document = json.dumps({"network_passphrase": validate.NETWORKS["public"][1]}) + "\n"
+    path = corpus_dir / "root-public.json"
+    path.write_text(document, encoding="utf-8")
+    digest = hashlib.sha256(document.encode()).hexdigest()
+    (corpus_dir / "root-public.toml").write_text(
+        'url = "https://horizon.stellar.org/"\n'
+        'captured_at = "2026-11-25T00:00:00Z"\n'
+        f'sha256 = "{digest}"\n',
+        encoding="utf-8",
+    )
+
+
 class TestValidateProblemPrefix(unittest.TestCase):
     def setUp(self) -> None:
         self.stage = tempfile.TemporaryDirectory(prefix="problem-prefix-test-")
         self.addCleanup(self.stage.cleanup)
         self.root = Path(self.stage.name)
         (self.root / "corpus").mkdir(parents=True, exist_ok=True)
-        (self.root / "corpus" / "root-public.json").write_text(
-            json.dumps({"network_passphrase": validate.NETWORKS["public"][1]}) + "\n",
-            encoding="utf-8",
-        )
+        write_root_public(self.root / "corpus")
         self.fixtures_dir = self.root / "fixtures"
         self.fixtures_dir.mkdir(parents=True, exist_ok=True)
 
@@ -63,7 +74,7 @@ class TestValidateProblemPrefix(unittest.TestCase):
             'network = "public"\n'
             f'source_url = "https://horizon.stellar.org/accounts/{account_id}"\n'
             'captured_at = "2026-11-24T00:00:00Z"\n'
-            'last_modified_ledger = 100\n'
+            "last_modified_ledger = 100\n"
             'horizon_version = "30.0.0"\n'
             f'sha256 = "{sha256}"\n'
             "shape = [\n"
